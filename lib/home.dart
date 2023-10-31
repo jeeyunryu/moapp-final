@@ -38,19 +38,6 @@ class Hotel {
       this.name, this.address, this.phone, this.description, this.imagePath);
 }
 
-// class MyAppState extends ChangeNotifier {
-//   var favorites = <Hotel>[];
-
-//   void toggleFavorite([Hotel? hotel]) {
-//     if (favorites.contains(hotel)) {
-//       favorites.remove(hotel);
-//     } else {
-//       favorites.add(hotel!);
-//     }
-//     notifyListeners();
-//   }
-// }
-
 class DetailScreen extends StatelessWidget {
   const DetailScreen({super.key, required this.hotel});
 
@@ -69,20 +56,30 @@ class DetailScreen extends StatelessWidget {
 
     return Scaffold(
         appBar: AppBar(
+          iconTheme: IconThemeData(
+            color: Colors.white, //change your color here
+          ),
           centerTitle: true,
-          title: Text(
+          title: const Text(
             'Detail',
+            style: TextStyle(color: Colors.white),
           ),
           backgroundColor: Colors.blue,
         ),
-        body: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        body: SingleChildScrollView(
+            child:
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Stack(children: <Widget>[
             Hero(
               tag: hotel.name,
               child: Material(
                   child: InkWell(
-                child: Image.asset(
-                  hotel.imagePath,
+                child: Container(
+                  // height: 300,
+                  child: Image.asset(
+                    // fit: BoxFit.fitWidth,
+                    hotel.imagePath,
+                  ),
                 ),
                 onDoubleTap: () {
                   appState.toggleFavorite(hotel);
@@ -105,8 +102,8 @@ class DetailScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 8.0, 0, 8.0),
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(0, 10.0, 0, 8.0),
                   child: Row(children: [
                     Icon(
                       Icons.star,
@@ -127,10 +124,10 @@ class DetailScreen extends StatelessWidget {
                     TypewriterAnimatedText(
                       hotel.name,
                       textStyle: const TextStyle(
-                        fontSize: 32.0,
+                        fontSize: 20.0,
                         fontWeight: FontWeight.bold,
                       ),
-                      speed: const Duration(milliseconds: 2000),
+                      speed: const Duration(milliseconds: 100),
                     ),
                   ],
                   totalRepeatCount: 4,
@@ -138,32 +135,45 @@ class DetailScreen extends StatelessWidget {
                   displayFullTextOnTap: true,
                   stopPauseOnTap: true,
                 ),
-                // Text(
-                //   hotel.name,
-                // ),
-                Row(children: [
-                  Icon(
-                    Icons.location_on,
-                    color: Colors.blue,
-                  ),
-                  Text(
-                    hotel.address,
-                  ),
-                ]),
-                Row(children: [
-                  Icon(
-                    Icons.phone,
-                    color: Colors.blue,
-                  ),
-                  Text(
-                    hotel.phone,
-                  ),
-                ]),
-                Text('description')
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Row(children: [
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8.0),
+                      child: const Icon(
+                        Icons.location_on,
+                        color: Colors.blue,
+                      ),
+                    ),
+                    Container(
+                      width: 250,
+                      child: Text(hotel.address,
+                          style: TextStyle(color: Colors.blue)),
+                    ),
+                  ]),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: Row(children: [
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8.0),
+                      child: const Icon(
+                        Icons.phone_enabled,
+                        color: Colors.blue,
+                      ),
+                    ),
+                    Text(hotel.phone, style: TextStyle(color: Colors.blue)),
+                  ]),
+                ),
+                Divider(color: Colors.black, thickness: 0.7),
+                Text(
+                  hotel.description,
+                  style: TextStyle(color: Colors.blue),
+                )
               ],
             ),
           )
-        ]));
+        ])));
   }
 }
 
@@ -174,16 +184,54 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
+final List<String> hotelNames = <String>[
+  'Polonia hotel',
+  'Gyeongju Hilton',
+  'The Westin Grand Berlin',
+  'Marina Bay Sands Hotel',
+  'Shila Hotel',
+  'Avanti Cove',
+];
+
+final List<String> listOfAddress = <String>[
+  'al. Jerozolimskie 45, 00-692 Warszawa',
+  '484-7 Bomun-ro Gyeongju-si Gyeongsangbuk-do KR',
+  'FriedreichstraBe 158/164, 10117 Berlin',
+  'I10 Bayfront Ave, 018956',
+  'I10 Bayfront Ave, 018956',
+  'I10 Bayfront Ave, 018956',
+];
+
+final List<String> descriptions = <String>[
+  'Hotel Polonia offers all the facilities you would expect from a 3 star hotel in Krakow: restaurant, room service, bar, front desk open 24 hours, laundry, TV. Located in the south east of Krakow, on Basztowa 25, 6 minutes by car from the hotel. Polonia Hotel Room is ALL DOUBLE',
+  'Hotel Polonia offers all the facilities you would expect from a 3 star hotel in Krakow: restaurant, room service, bar, front desk open 24 hours, laundry, TV. Located in the south east of Krakow, on Basztowa 25, 6 minutes by car from the hotel. Polonia Hotel Room is ALL DOUBLE',
+  'Hotel Polonia offers all the facilities you would expect from a 3 star hotel in Krakow: restaurant, room service, bar, front desk open 24 hours, laundry, TV. Located in the south east of Krakow, on Basztowa 25, 6 minutes by car from the hotel. Polonia Hotel Room is ALL DOUBLE',
+  'Hotel Polonia offers all the facilities you would expect from a 3 star hotel in Krakow: restaurant, room service, bar, front desk open 24 hours, laundry, TV. Located in the south east of Krakow, on Basztowa 25, 6 minutes by car from the hotel. Polonia Hotel Room is ALL DOUBLE',
+  'Hotel Polonia offers all the facilities you would expect from a 3 star hotel in Krakow: restaurant, room service, bar, front desk open 24 hours, laundry, TV. Located in the south east of Krakow, on Basztowa 25, 6 minutes by car from the hotel. Polonia Hotel Room is ALL DOUBLE',
+  'Hotel Polonia offers all the facilities you would expect from a 3 star hotel in Krakow: restaurant, room service, bar, front desk open 24 hours, laundry, TV. Located in the south east of Krakow, on Basztowa 25, 6 minutes by car from the hotel. Polonia Hotel Room is ALL DOUBLE',
+];
+
+final List<String> phoneNumbers = <String>[
+  '+48 22 318 28 00',
+  '+48 22 318 28 00',
+  '+48 22 318 28 00',
+  '+48 22 318 28 00',
+  '+48 22 318 28 00',
+  '+48 22 318 28 00',
+];
+
 class _HomePageState extends State<HomePage> {
   final List<bool> _selectedView = <bool>[false, true];
+
+  bool isGridView = true;
 
   final hotels = List.generate(
       6,
       (i) => Hotel(
-            'Hotel name ${i + 1}',
-            'address ${i + 1}',
-            'phone ${i + 1}',
-            'description ${i + 1}',
+            hotelNames[i],
+            listOfAddress[i],
+            phoneNumbers[i],
+            descriptions[i],
             'assets/hotel${i + 1}.jpg',
           ));
 
@@ -200,16 +248,20 @@ class _HomePageState extends State<HomePage> {
                   padding: const EdgeInsets.all(16.0),
                   child: Hero(
                     tag: hotel.name,
-                    child: Image.asset(
-                      hotel.imagePath,
-                      // fit: BoxFit.fitHeight,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: Image.asset(
+                        hotel.imagePath,
+                        fit: BoxFit.fitHeight,
+                      ),
                     ),
                   ),
                 ),
               ),
               Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
+                  const Row(
                     children: [
                       Icon(
                         Icons.star,
@@ -238,38 +290,39 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ],
                   ),
-                  Text(
-                    hotel.name,
-                  ),
-                  Text(
-                    hotel.address,
+                  Text(hotel.name,
+                      style: const TextStyle(fontWeight: FontWeight.bold)),
+                  Row(
+                    children: [
+                      Container(
+                        width: 130,
+                        child: Text(
+                          hotel.address,
+                        ),
+                      ),
+                      TextButton(
+                        child: const Text('more'),
+                        onPressed: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      DetailScreen(hotel: hotel)));
+                        },
+                      )
+                    ],
                   )
                 ],
               ),
-              TextButton(
-                child: Text('more'),
-                onPressed: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => DetailScreen(hotel: hotel)));
-                },
-              )
             ],
           ));
     }).toList();
   }
 
   List<Card> _buildGridCards(BuildContext context) {
-    // List<Product> products = ProductsRepository.loadProducts(Category.all);
-
     if (hotels.isEmpty) {
       return const <Card>[];
     }
-
-    final ThemeData theme = Theme.of(context);
-    final NumberFormat formatter = NumberFormat.simpleCurrency(
-        locale: Localizations.localeOf(context).toString());
 
     return hotels.map((hotel) {
       return Card(
@@ -290,59 +343,88 @@ class _HomePageState extends State<HomePage> {
             ),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 8.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Row(children: [
-                      Icon(
-                        Icons.star,
-                        color: Colors.yellow,
-                        size: 10.0,
+                padding: const EdgeInsets.fromLTRB(0.0, 0.0, 16.0, 8.0),
+                child: Row(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(top: 20),
+                      child: Icon(
+                        Icons.location_on,
+                        color: Colors.blue,
+                        size: 10,
                       ),
-                      Icon(
-                        Icons.star,
-                        color: Colors.yellow,
-                        size: 10.0,
-                      ),
-                      Icon(
-                        Icons.star,
-                        color: Colors.yellow,
-                        size: 10.0,
-                      ),
-                      Icon(
-                        Icons.star,
-                        color: Colors.yellow,
-                        size: 10.0,
-                      ),
-                    ]),
-                    Text(
-                      hotel.name,
-                      // style: theme.textTheme.bodySmall,
-                      style: TextStyle(fontSize: 4),
-                      maxLines: 1,
                     ),
-                    Text(
-                      // formatter.format(product.price),
+                    Container(
+                      width: 100,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Padding(
+                            padding:
+                                const EdgeInsets.only(top: 4.0, bottom: 0.0),
+                            child: Row(children: [
+                              Icon(
+                                Icons.star,
+                                color: Colors.yellow,
+                                size: 10.0,
+                              ),
+                              Icon(
+                                Icons.star,
+                                color: Colors.yellow,
+                                size: 10.0,
+                              ),
+                              Icon(
+                                Icons.star,
+                                color: Colors.yellow,
+                                size: 10.0,
+                              ),
+                              Icon(
+                                Icons.star,
+                                color: Colors.yellow,
+                                size: 10.0,
+                              ),
+                            ]),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(top: 5),
+                            child: Text(
+                              hotel.name,
+                              // style: theme.textTheme.bodySmall,
+                              style: TextStyle(
+                                  fontSize: 10, fontWeight: FontWeight.bold),
 
-                      hotel.address,
-                      style: TextStyle(fontSize: 4),
-                      // style: theme.textTheme.bodySmall,
-                    ),
-                    TextButton(
-                      child: Text(
-                        'more',
-                        // style: DefaultTextStyle.of(context)
-                        //     .style
-                        //     .apply(fontSizeFactor: 0.9),
+                              maxLines: 1,
+                            ),
+                          ),
+                          Row(
+                            children: [
+                              Container(
+                                width: 35,
+                                child: Text(
+                                  hotel.address,
+                                  style: TextStyle(fontSize: 4),
+                                ),
+                              ),
+                              Container(
+                                height: 35,
+                                width: 60,
+                                child: TextButton(
+                                  child: Text(
+                                    'more',
+                                  ),
+                                  onPressed: () {
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                DetailScreen(hotel: hotel)));
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
-                      onPressed: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    DetailScreen(hotel: hotel)));
-                      },
                     ),
                   ],
                 ),
@@ -366,61 +448,95 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
         drawer: Drawer(
-            child: ListView(padding: EdgeInsets.zero, children: [
-          const DrawerHeader(
-            decoration: BoxDecoration(
-              color: Colors.blue,
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.only(
+                topRight: Radius.circular(0),
+                bottomRight: Radius.circular(0),
+              ),
             ),
-            child: Text('Pages'),
-          ),
-          ListTile(
-              leading: const Icon(Icons.home),
-              title: const Text('Home'),
-              onTap: () {
-                Navigator.pushNamed(context, '/');
-              }),
-          ListTile(
-              leading: const Icon(Icons.search),
-              title: const Text('Search'),
-              onTap: () {
-                Navigator.pushNamed(context, '/search');
-              }),
-          ListTile(
-              leading: const Icon(Icons.location_city),
-              title: const Text('Favorite Hotel'),
-              onTap: () {
-                Navigator.pushNamed(context, '/favorites');
-              }),
-          ListTile(
-              leading: const Icon(Icons.person),
-              title: const Text('My Page'),
-              onTap: () {
-                Navigator.pushNamed(context, '/profile');
-              }),
-          ListTile(
-              leading: const Icon(Icons.logout),
-              title: const Text('Log Out'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.pushNamed(context, '/login');
-              }),
-        ])),
+            child: ListView(padding: EdgeInsets.zero, children: [
+              const DrawerHeader(
+                decoration: BoxDecoration(
+                  color: Colors.lightBlue,
+                ),
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(10, 90, 0, 0),
+                  child: Text('Pages',
+                      style: TextStyle(color: Colors.white, fontSize: 25)),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 10),
+                child: ListTile(
+                    leading: const Icon(Icons.home, color: Colors.lightBlue),
+                    title: const Text('Home'),
+                    onTap: () {
+                      Navigator.pushNamed(context, '/');
+                    }),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 10),
+                child: ListTile(
+                    leading: const Icon(Icons.search, color: Colors.lightBlue),
+                    title: const Text('Search'),
+                    onTap: () {
+                      Navigator.pushNamed(context, '/search');
+                    }),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 10),
+                child: ListTile(
+                    leading: const Icon(Icons.location_city,
+                        color: Colors.lightBlue),
+                    title: const Text('Favorite Hotel'),
+                    onTap: () {
+                      Navigator.pushNamed(context, '/favorites');
+                    }),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 10),
+                child: ListTile(
+                    leading: const Icon(Icons.person, color: Colors.lightBlue),
+                    title: const Text('My Page'),
+                    onTap: () {
+                      Navigator.pushNamed(context, '/profile');
+                    }),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 10),
+                child: ListTile(
+                    leading: const Icon(Icons.logout, color: Colors.lightBlue),
+                    title: const Text('Log Out'),
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.pushNamed(context, '/login');
+                    }),
+              ),
+            ])),
         appBar: AppBar(
-          // leading: IconButton(
-          //   icon: const Icon(
-          //     Icons.menu,
-          //     semanticLabel: 'menu',
-          //   ),
-          //   onPressed: () {
-          //     print('Menu button');
-          //   },
-          // ),
-          title: const Text('Main'),
+          leading: Builder(
+            builder: (BuildContext context) {
+              return IconButton(
+                icon: const Icon(
+                  Icons.menu,
+                  semanticLabel: 'menu',
+                  color: Colors.white,
+                ),
+                onPressed: () {
+                  Scaffold.of(context).openDrawer();
+                },
+              );
+            },
+          ),
+          centerTitle: true,
+          backgroundColor: Colors.blue,
+          title: const Text('Main', style: TextStyle(color: Colors.white)),
           actions: <Widget>[
             IconButton(
               icon: const Icon(
                 Icons.search,
                 semanticLabel: 'search',
+                color: Colors.white,
               ),
               onPressed: () {
                 Navigator.pushNamed(context, '/search');
@@ -430,23 +546,37 @@ class _HomePageState extends State<HomePage> {
               icon: const Icon(
                 Icons.language,
                 semanticLabel: 'language',
+                color: Colors.white,
               ),
               onPressed: _launchUrl,
             ),
           ],
         ),
         body: Column(children: [
-          ToggleButtons(
-            direction: Axis.horizontal,
-            onPressed: (int index) {
-              setState(() {
-                for (int i = 0; i < _selectedView.length; i++) {
-                  _selectedView[i] = i == index;
-                }
-              });
-            },
-            children: icons,
-            isSelected: _selectedView,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(right: 18.0, top: 10.0),
+                child: ToggleButtons(
+                  borderRadius: BorderRadius.circular(5),
+                  selectedBorderColor: Colors.blue,
+                  selectedColor: Colors.blue,
+                  fillColor: Colors.white10,
+                  direction: Axis.horizontal,
+                  onPressed: (int index) {
+                    setState(() {
+                      isGridView = index == 1;
+                      // for (int i = 0; i < _selectedView.length; i++) {
+                      //   _selectedView[i] = i == index;
+                      // }
+                    });
+                  },
+                  children: icons,
+                  isSelected: [!isGridView, isGridView],
+                ),
+              ),
+            ],
           ),
           Expanded(
               child: _selectedView[1]
@@ -457,340 +587,12 @@ class _HomePageState extends State<HomePage> {
                         padding: const EdgeInsets.all(16.0),
                         childAspectRatio: 8.0 / 9.0,
                         children: _buildGridCards(context),
-                        // children: [
-                        //   Expanded(
-                        //     child: Card(
-                        //         child: Expanded(
-                        //             child: Column(
-                        //       crossAxisAlignment: CrossAxisAlignment.start,
-                        //       children: <Widget>[
-                        //         AspectRatio(
-                        //           aspectRatio: 18 / 11,
-                        //           child: Image.asset(
-                        //             'assets/hotel1.jpg',
-                        //             fit: BoxFit.fill,
-                        //           ),
-                        //         ),
-                        //         Expanded(
-                        //             child: Padding(
-                        //                 padding: const EdgeInsets.fromLTRB(
-                        //                     16.0, 0.0, 16.0, 8.0),
-                        //                 child: Column(
-                        //                     crossAxisAlignment:
-                        //                         CrossAxisAlignment.start,
-                        //                     children: <Widget>[
-                        //                       const Row(
-                        //                         children: [
-                        //                           Icon(
-                        //                             Icons.star,
-                        //                             color: Colors.yellow,
-                        //                             size: 15.0,
-                        //                           ),
-                        //                           Icon(
-                        //                             Icons.star,
-                        //                             color: Colors.yellow,
-                        //                             size: 15.0,
-                        //                           ),
-                        //                           Icon(Icons.star,
-                        //                               color: Colors.yellow,
-                        //                               size: 15.0),
-                        //                           Icon(Icons.star,
-                        //                               color: Colors.yellow,
-                        //                               size: 15.0),
-                        //                         ],
-                        //                       ),
-                        //                       const Text(
-                        //                         'Polonia hotel',
-                        //                         style: TextStyle(
-                        //                           fontWeight: FontWeight.bold,
-                        //                         ),
-                        //                       ),
-                        //                       Row(
-                        //                         children: [
-                        //                           Icon(
-                        //                             Icons.location_on,
-                        //                           ),
-                        //                           Text(
-                        //                             'al. Jerozolimskie 45, 00-692 Warszawa',
-                        //                             style: DefaultTextStyle.of(
-                        //                                     context)
-                        //                                 .style
-                        //                                 .apply(
-                        //                                     fontSizeFactor:
-                        //                                         0.77),
-                        //                             // textAlign: TextAlign.justify,
-                        //                           ),
-                        //                         ],
-                        //                       ),
-                        //                       TextButton(
-                        //                           child: const Text('more'),
-                        //                           onPressed: () {}),
-                        //                     ])))
-                        //       ],
-                        //     ))),
-                        //   ),
-                        //   const Card(
-                        //       child: Column(
-                        //     crossAxisAlignment: CrossAxisAlignment.start,
-                        //     children: <Widget>[
-                        //       Expanded(
-                        //           child: Padding(
-                        //               padding: EdgeInsets.fromLTRB(
-                        //                   16.0, 12.0, 16.0, 8.0),
-                        //               child: Column(
-                        //                   crossAxisAlignment:
-                        //                       CrossAxisAlignment.start,
-                        //                   children: <Widget>[
-                        //                     Text('hello'),
-                        //                     SizedBox(height: 8.0),
-                        //                     Text('hello'),
-                        //                   ])))
-                        //     ],
-                        //   )),
-                        //   const Card(
-                        //       child: Column(
-                        //     crossAxisAlignment: CrossAxisAlignment.start,
-                        //     children: <Widget>[
-                        //       Expanded(
-                        //           child: Padding(
-                        //               padding: EdgeInsets.fromLTRB(
-                        //                   16.0, 12.0, 16.0, 8.0),
-                        //               child: Column(
-                        //                   crossAxisAlignment:
-                        //                       CrossAxisAlignment.start,
-                        //                   children: <Widget>[
-                        //                     Text('hello'),
-                        //                     SizedBox(height: 8.0),
-                        //                     Text('hello'),
-                        //                   ])))
-                        //     ],
-                        //   )),
-                        //   const Card(
-                        //       child: Column(
-                        //     crossAxisAlignment: CrossAxisAlignment.start,
-                        //     children: <Widget>[
-                        //       Expanded(
-                        //           child: Padding(
-                        //               padding: EdgeInsets.fromLTRB(
-                        //                   16.0, 12.0, 16.0, 8.0),
-                        //               child: Column(
-                        //                   crossAxisAlignment:
-                        //                       CrossAxisAlignment.start,
-                        //                   children: <Widget>[
-                        //                     Text('hello'),
-                        //                     SizedBox(height: 8.0),
-                        //                     Text('hello'),
-                        //                   ])))
-                        //     ],
-                        //   )),
-                        //   const Card(
-                        //       child: Column(
-                        //     crossAxisAlignment: CrossAxisAlignment.start,
-                        //     children: <Widget>[
-                        //       Expanded(
-                        //           child: Padding(
-                        //               padding: EdgeInsets.fromLTRB(
-                        //                   16.0, 12.0, 16.0, 8.0),
-                        //               child: Column(
-                        //                   crossAxisAlignment:
-                        //                       CrossAxisAlignment.start,
-                        //                   children: <Widget>[
-                        //                     Text('hello'),
-                        //                     SizedBox(height: 8.0),
-                        //                     Text('hello'),
-                        //                   ])))
-                        //     ],
-                        //   )),
-                        //   const Card(
-                        //       child: Column(
-                        //     crossAxisAlignment: CrossAxisAlignment.start,
-                        //     children: <Widget>[
-                        //       Expanded(
-                        //           child: Padding(
-                        //               padding: EdgeInsets.fromLTRB(
-                        //                   16.0, 12.0, 16.0, 8.0),
-                        //               child: Column(
-                        //                   crossAxisAlignment:
-                        //                       CrossAxisAlignment.start,
-                        //                   children: <Widget>[
-                        //                     Text('hello'),
-                        //                     SizedBox(height: 8.0),
-                        //                     Text('hello'),
-                        //                   ])))
-                        //     ],
-                        //   ))
-                        // ],
                       );
                     })
                   : ListView(
                       padding: const EdgeInsets.all(8),
                       children: _buildListCards(context),
-                      // <Widget>[
-                      //   Card(
-                      //     child: Row(
-                      //       crossAxisAlignment: CrossAxisAlignment.start,
-                      //       children: <Widget>[
-                      //         Expanded(
-                      //           child: Image.asset(
-                      //             'assets/hotel1.jpg',
-                      //             fit: BoxFit.fill,
-                      //           ),
-                      //         ),
-                      //         Expanded(
-                      //           child: Padding(
-                      //             padding: const EdgeInsets.fromLTRB(
-                      //                 16.0, 12.0, 16.0, 8.0),
-                      //             child: Column(
-                      //               crossAxisAlignment:
-                      //                   CrossAxisAlignment.start,
-                      //               children: <Widget>[
-                      //                 const Row(
-                      //                   children: [
-                      //                     Icon(
-                      //                       Icons.star,
-                      //                       color: Colors.yellow,
-                      //                     ),
-                      //                     Icon(
-                      //                       Icons.star,
-                      //                       color: Colors.yellow,
-                      //                     ),
-                      //                     Icon(
-                      //                       Icons.star,
-                      //                       color: Colors.yellow,
-                      //                     ),
-                      //                     Icon(
-                      //                       Icons.star,
-                      //                       color: Colors.yellow,
-                      //                     ),
-                      //                   ],
-                      //                 ),
-                      //                 const Text(
-                      //                   'Polonia hotel',
-                      //                   style: TextStyle(
-                      //                     fontWeight: FontWeight.bold,
-                      //                   ),
-                      //                 ),
-                      //                 const SizedBox(height: 8.0),
-                      //                 Text(
-                      //                   'al. Jerozolimskie 45, 00-692 Warszawa',
-                      //                   // textAlign: TextAlign.justify,
-                      //                 ),
-                      //               ],
-                      //             ),
-                      //           ),
-                      //         ),
-                      //         Row(
-                      //           crossAxisAlignment: CrossAxisAlignment.end,
-                      //           children: [
-                      //             TextButton(
-                      //               child: Padding(
-                      //                 padding:
-                      //                     const EdgeInsets.only(top: 100.0),
-                      //                 child: const Text(
-                      //                   'more',
-                      //                 ),
-                      //               ),
-                      //               onPressed: () {},
-                      //             ),
-                      //           ],
-                      //         ),
-                      //       ],
-                      //     ),
-                      //   ),
-                      //   Card(
-                      //       child: Row(
-                      //     crossAxisAlignment: CrossAxisAlignment.start,
-                      //     children: <Widget>[
-                      //       Expanded(
-                      //           child: Padding(
-                      //               padding: EdgeInsets.fromLTRB(
-                      //                   16.0, 12.0, 16.0, 8.0),
-                      //               child: Column(
-                      //                   crossAxisAlignment:
-                      //                       CrossAxisAlignment.start,
-                      //                   children: <Widget>[
-                      //                     Text('hello'),
-                      //                     SizedBox(height: 8.0),
-                      //                     Text('hello'),
-                      //                   ])))
-                      //     ],
-                      //   )),
-                      //   Card(
-                      //       child: Row(
-                      //     crossAxisAlignment: CrossAxisAlignment.start,
-                      //     children: <Widget>[
-                      //       Expanded(
-                      //           child: Padding(
-                      //               padding: EdgeInsets.fromLTRB(
-                      //                   16.0, 12.0, 16.0, 8.0),
-                      //               child: Column(
-                      //                   crossAxisAlignment:
-                      //                       CrossAxisAlignment.start,
-                      //                   children: <Widget>[
-                      //                     Text('hello'),
-                      //                     SizedBox(height: 8.0),
-                      //                     Text('hello'),
-                      //                   ])))
-                      //     ],
-                      //   )),
-                      //   Card(
-                      //       child: Row(
-                      //     crossAxisAlignment: CrossAxisAlignment.start,
-                      //     children: <Widget>[
-                      //       Expanded(
-                      //           child: Padding(
-                      //               padding: EdgeInsets.fromLTRB(
-                      //                   16.0, 12.0, 16.0, 8.0),
-                      //               child: Column(
-                      //                   crossAxisAlignment:
-                      //                       CrossAxisAlignment.start,
-                      //                   children: <Widget>[
-                      //                     Text('hello'),
-                      //                     SizedBox(height: 8.0),
-                      //                     Text('hello'),
-                      //                   ])))
-                      //     ],
-                      //   )),
-                      //   Card(
-                      //       child: Row(
-                      //     crossAxisAlignment: CrossAxisAlignment.start,
-                      //     children: <Widget>[
-                      //       Expanded(
-                      //           child: Padding(
-                      //               padding: EdgeInsets.fromLTRB(
-                      //                   16.0, 12.0, 16.0, 8.0),
-                      //               child: Column(
-                      //                   crossAxisAlignment:
-                      //                       CrossAxisAlignment.start,
-                      //                   children: <Widget>[
-                      //                     Text('hello'),
-                      //                     SizedBox(height: 8.0),
-                      //                     Text('hello'),
-                      //                   ])))
-                      //     ],
-                      //   )),
-                      //   Card(
-                      //       child: Row(
-                      //     crossAxisAlignment: CrossAxisAlignment.start,
-                      //     children: <Widget>[
-                      //       Expanded(
-                      //           child: Padding(
-                      //               padding: EdgeInsets.fromLTRB(
-                      //                   16.0, 12.0, 16.0, 8.0),
-                      //               child: Column(
-                      //                   crossAxisAlignment:
-                      //                       CrossAxisAlignment.start,
-                      //                   children: <Widget>[
-                      //                     Text('hello'),
-                      //                     SizedBox(height: 8.0),
-                      //                     Text('hello'),
-                      //                   ])))
-                      //     ],
-                      //   )),
-                      // ],
                     )),
-        ]
-            // resizeToAvoidBottomInset: false,
-            ));
+        ]));
   }
 }
