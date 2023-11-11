@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
@@ -19,6 +21,8 @@ import 'package:shrine/app.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:provider/provider.dart';
 
+import 'app_state.dart';
+import 'detail.dart';
 import 'model/product.dart';
 import 'model/products_repository.dart';
 
@@ -35,296 +39,25 @@ class Hotel {
   final String imagePath;
 
   const Hotel(
-      this.name, this.address, this.phone, this.description, this.imagePath);
-}
-
-class DetailScreen extends StatelessWidget {
-  const DetailScreen({super.key, required this.hotel});
-
-  final Hotel hotel;
-
-  @override
-  Widget build(BuildContext context) {
-    var appState = context.watch<MyAppState>();
-
-    IconData icon;
-    if (appState.favorites.contains(hotel)) {
-      icon = Icons.favorite;
-    } else {
-      icon = Icons.favorite_border;
-    }
-
-    return Scaffold(
-        appBar: AppBar(
-          iconTheme: IconThemeData(
-            color: Colors.white, //change your color here
-          ),
-          centerTitle: true,
-          title: const Text(
-            'Detail',
-            style: TextStyle(color: Colors.white),
-          ),
-          backgroundColor: Colors.blue,
-        ),
-        body: SingleChildScrollView(
-            child:
-                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Stack(children: <Widget>[
-            Hero(
-              tag: hotel.name,
-              child: Material(
-                  child: InkWell(
-                child: Container(
-                  // height: 300,
-                  child: Image.asset(
-                    // fit: BoxFit.fitWidth,
-                    hotel.imagePath,
-                  ),
-                ),
-                onDoubleTap: () {
-                  appState.toggleFavorite(hotel);
-                },
-              )),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Align(
-                alignment: Alignment.topRight,
-                child: Icon(
-                  icon,
-                  color: Colors.red,
-                ),
-              ),
-            )
-          ]),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(30.0, 0, 30.0, 0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Padding(
-                  padding: EdgeInsets.fromLTRB(0, 10.0, 0, 8.0),
-                  child: Row(children: [
-                    Icon(
-                      Icons.star,
-                      color: Colors.yellow,
-                    ),
-                    Icon(
-                      Icons.star,
-                      color: Colors.yellow,
-                    ),
-                    Icon(
-                      Icons.star,
-                      color: Colors.yellow,
-                    ),
-                  ]),
-                ),
-                AnimatedTextKit(
-                  animatedTexts: [
-                    TypewriterAnimatedText(
-                      hotel.name,
-                      textStyle: const TextStyle(
-                        fontSize: 20.0,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      speed: const Duration(milliseconds: 100),
-                    ),
-                  ],
-                  totalRepeatCount: 4,
-                  pause: const Duration(milliseconds: 1000),
-                  displayFullTextOnTap: true,
-                  stopPauseOnTap: true,
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: Row(children: [
-                    Padding(
-                      padding: const EdgeInsets.only(right: 8.0),
-                      child: const Icon(
-                        Icons.location_on,
-                        color: Colors.blue,
-                      ),
-                    ),
-                    Container(
-                      width: 250,
-                      child: Text(hotel.address,
-                          style: TextStyle(color: Colors.blue)),
-                    ),
-                  ]),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8.0),
-                  child: Row(children: [
-                    Padding(
-                      padding: const EdgeInsets.only(right: 8.0),
-                      child: const Icon(
-                        Icons.phone_enabled,
-                        color: Colors.blue,
-                      ),
-                    ),
-                    Text(hotel.phone, style: TextStyle(color: Colors.blue)),
-                  ]),
-                ),
-                Divider(color: Colors.black, thickness: 0.7),
-                Text(
-                  hotel.description,
-                  style: TextStyle(color: Colors.blue),
-                )
-              ],
-            ),
-          )
-        ])));
-  }
+      this.name, this.address, this.description, this.phone, this.imagePath);
 }
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
 
+  // final List<ProductList> products;
+
   @override
   State<HomePage> createState() => _HomePageState();
 }
-
-final List<String> hotelNames = <String>[
-  'Polonia hotel',
-  'Gyeongju Hilton',
-  'The Westin Grand Berlin',
-  'Marina Bay Sands Hotel',
-  'Shila Hotel',
-  'Avanti Cove',
-];
-
-final List<String> listOfAddress = <String>[
-  'al. Jerozolimskie 45, 00-692 Warszawa',
-  '484-7 Bomun-ro Gyeongju-si Gyeongsangbuk-do KR',
-  'FriedreichstraBe 158/164, 10117 Berlin',
-  'I10 Bayfront Ave, 018956',
-  'I10 Bayfront Ave, 018956',
-  'I10 Bayfront Ave, 018956',
-];
-
-final List<String> descriptions = <String>[
-  'Hotel Polonia offers all the facilities you would expect from a 3 star hotel in Krakow: restaurant, room service, bar, front desk open 24 hours, laundry, TV. Located in the south east of Krakow, on Basztowa 25, 6 minutes by car from the hotel. Polonia Hotel Room is ALL DOUBLE',
-  'Hotel Polonia offers all the facilities you would expect from a 3 star hotel in Krakow: restaurant, room service, bar, front desk open 24 hours, laundry, TV. Located in the south east of Krakow, on Basztowa 25, 6 minutes by car from the hotel. Polonia Hotel Room is ALL DOUBLE',
-  'Hotel Polonia offers all the facilities you would expect from a 3 star hotel in Krakow: restaurant, room service, bar, front desk open 24 hours, laundry, TV. Located in the south east of Krakow, on Basztowa 25, 6 minutes by car from the hotel. Polonia Hotel Room is ALL DOUBLE',
-  'Hotel Polonia offers all the facilities you would expect from a 3 star hotel in Krakow: restaurant, room service, bar, front desk open 24 hours, laundry, TV. Located in the south east of Krakow, on Basztowa 25, 6 minutes by car from the hotel. Polonia Hotel Room is ALL DOUBLE',
-  'Hotel Polonia offers all the facilities you would expect from a 3 star hotel in Krakow: restaurant, room service, bar, front desk open 24 hours, laundry, TV. Located in the south east of Krakow, on Basztowa 25, 6 minutes by car from the hotel. Polonia Hotel Room is ALL DOUBLE',
-  'Hotel Polonia offers all the facilities you would expect from a 3 star hotel in Krakow: restaurant, room service, bar, front desk open 24 hours, laundry, TV. Located in the south east of Krakow, on Basztowa 25, 6 minutes by car from the hotel. Polonia Hotel Room is ALL DOUBLE',
-];
-
-final List<String> phoneNumbers = <String>[
-  '+48 22 318 28 00',
-  '+48 22 318 28 00',
-  '+48 22 318 28 00',
-  '+48 22 318 28 00',
-  '+48 22 318 28 00',
-  '+48 22 318 28 00',
-];
 
 class _HomePageState extends State<HomePage> {
   final List<bool> _selectedView = <bool>[false, true];
 
   bool isGridView = true;
 
-  final hotels = List.generate(
-      6,
-      (i) => Hotel(
-            hotelNames[i],
-            listOfAddress[i],
-            phoneNumbers[i],
-            descriptions[i],
-            'assets/hotel${i + 1}.jpg',
-          ));
-
-  List<Card> _buildListCards(BuildContext context) {
-    return hotels.map((hotel) {
-      return Card(
-          clipBehavior: Clip.antiAlias,
-          child: Row(
-            children: [
-              Container(
-                height: 130,
-                width: 130,
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Hero(
-                    tag: hotel.name,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
-                      child: Image.asset(
-                        hotel.imagePath,
-                        fit: BoxFit.fitHeight,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Row(
-                    children: [
-                      Icon(
-                        Icons.star,
-                        color: Colors.yellow,
-                        size: 20.0,
-                      ),
-                      Icon(
-                        Icons.star,
-                        color: Colors.yellow,
-                        size: 20.0,
-                      ),
-                      Icon(
-                        Icons.star,
-                        color: Colors.yellow,
-                        size: 20.0,
-                      ),
-                      Icon(
-                        Icons.star,
-                        color: Colors.yellow,
-                        size: 20.0,
-                      ),
-                      Icon(
-                        Icons.star,
-                        color: Colors.yellow,
-                        size: 20.0,
-                      ),
-                    ],
-                  ),
-                  Text(hotel.name,
-                      style: const TextStyle(fontWeight: FontWeight.bold)),
-                  Row(
-                    children: [
-                      Container(
-                        width: 130,
-                        child: Text(
-                          hotel.address,
-                        ),
-                      ),
-                      TextButton(
-                        child: const Text('more'),
-                        onPressed: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      DetailScreen(hotel: hotel)));
-                        },
-                      )
-                    ],
-                  )
-                ],
-              ),
-            ],
-          ));
-    }).toList();
-  }
-
-  List<Card> _buildGridCards(BuildContext context) {
-    if (hotels.isEmpty) {
-      return const <Card>[];
-    }
-
-    return hotels.map((hotel) {
+  List<Card> _buildGridCards(BuildContext context, List<ProductList> products) {
+    return products.map((product) {
       return Card(
         clipBehavior: Clip.antiAlias,
         child: Column(
@@ -333,12 +66,10 @@ class _HomePageState extends State<HomePage> {
             AspectRatio(
               aspectRatio: 18 / 11,
               child: Hero(
-                tag: hotel.name,
-                child: Image.asset(
-                  hotel.imagePath,
-                  // package: product.assetPackage,
-                  fit: BoxFit.fitWidth,
-                ),
+                tag: product.name,
+                child: product.imageurl != ''
+                    ? Image.file(File(product.imageurl))
+                    : Image.asset('assets/logo.png'),
               ),
             ),
             Expanded(
@@ -346,52 +77,18 @@ class _HomePageState extends State<HomePage> {
                 padding: const EdgeInsets.fromLTRB(0.0, 0.0, 16.0, 8.0),
                 child: Row(
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.only(top: 20),
-                      child: Icon(
-                        Icons.location_on,
-                        color: Colors.blue,
-                        size: 10,
-                      ),
-                    ),
                     Container(
                       width: 100,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Padding(
-                            padding:
-                                const EdgeInsets.only(top: 4.0, bottom: 0.0),
-                            child: Row(children: [
-                              Icon(
-                                Icons.star,
-                                color: Colors.yellow,
-                                size: 10.0,
-                              ),
-                              Icon(
-                                Icons.star,
-                                color: Colors.yellow,
-                                size: 10.0,
-                              ),
-                              Icon(
-                                Icons.star,
-                                color: Colors.yellow,
-                                size: 10.0,
-                              ),
-                              Icon(
-                                Icons.star,
-                                color: Colors.yellow,
-                                size: 10.0,
-                              ),
-                            ]),
-                          ),
-                          Padding(
                             padding: const EdgeInsets.only(top: 5),
                             child: Text(
-                              hotel.name,
+                              product.name,
+
                               // style: theme.textTheme.bodySmall,
-                              style: TextStyle(
-                                  fontSize: 10, fontWeight: FontWeight.bold),
+                              style: TextStyle(fontWeight: FontWeight.bold),
 
                               maxLines: 1,
                             ),
@@ -401,8 +98,8 @@ class _HomePageState extends State<HomePage> {
                               Container(
                                 width: 35,
                                 child: Text(
-                                  hotel.address,
-                                  style: TextStyle(fontSize: 4),
+                                  '\$ ${product.price.toString()}',
+                                  // style: TextStyle(fontSize: 4),
                                 ),
                               ),
                               Container(
@@ -416,8 +113,8 @@ class _HomePageState extends State<HomePage> {
                                     Navigator.push(
                                         context,
                                         MaterialPageRoute(
-                                            builder: (context) =>
-                                                DetailScreen(hotel: hotel)));
+                                            builder: (context) => DetailScreen(
+                                                product: product)));
                                   },
                                 ),
                               ),
@@ -518,12 +215,13 @@ class _HomePageState extends State<HomePage> {
             builder: (BuildContext context) {
               return IconButton(
                 icon: const Icon(
-                  Icons.menu,
-                  semanticLabel: 'menu',
+                  Icons.person,
+                  semanticLabel: 'profile',
                   color: Colors.white,
                 ),
                 onPressed: () {
-                  Scaffold.of(context).openDrawer();
+                  // Scaffold.of(context).openDrawer();
+                  Navigator.pushNamed(context, '/profile');
                 },
               );
             },
@@ -534,65 +232,91 @@ class _HomePageState extends State<HomePage> {
           actions: <Widget>[
             IconButton(
               icon: const Icon(
-                Icons.search,
-                semanticLabel: 'search',
+                Icons.add,
+                semanticLabel: 'add',
                 color: Colors.white,
               ),
               onPressed: () {
-                Navigator.pushNamed(context, '/search');
+                Navigator.pushNamed(context, '/addProduct');
               },
-            ),
-            IconButton(
-              icon: const Icon(
-                Icons.language,
-                semanticLabel: 'language',
-                color: Colors.white,
-              ),
-              onPressed: _launchUrl,
             ),
           ],
         ),
-        body: Column(children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(right: 18.0, top: 10.0),
-                child: ToggleButtons(
-                  borderRadius: BorderRadius.circular(5),
-                  selectedBorderColor: Colors.blue,
-                  selectedColor: Colors.blue,
-                  fillColor: Colors.white10,
-                  direction: Axis.horizontal,
-                  onPressed: (int index) {
-                    setState(() {
-                      isGridView = index == 1;
-                      // for (int i = 0; i < _selectedView.length; i++) {
-                      //   _selectedView[i] = i == index;
-                      // }
-                    });
-                  },
-                  children: icons,
-                  isSelected: [!isGridView, isGridView],
-                ),
-              ),
-            ],
-          ),
-          Expanded(
-              child: _selectedView[1]
-                  ? OrientationBuilder(builder: (context, orientation) {
+        body:
+            // Row(
+            //   mainAxisAlignment: MainAxisAlignment.end,
+            //   children: [
+            //     Padding(
+            //       padding: const EdgeInsets.only(right: 18.0, top: 10.0),
+            //       child: ToggleButtons(
+            //         borderRadius: BorderRadius.circular(5),
+            //         selectedBorderColor: Colors.blue,
+            //         selectedColor: Colors.blue,
+            //         fillColor: Colors.white10,
+            //         direction: Axis.horizontal,
+            //         onPressed: (int index) {
+            //           setState(() {
+            //             isGridView = index == 1;
+            //             // for (int i = 0; i < _selectedView.length; i++) {
+            //             //   _selectedView[i] = i == index;
+            //             // }
+            //           });
+            //         },
+            //         children: icons,
+            //         isSelected: [!isGridView, isGridView],
+            //       ),
+            //     ),
+            //   ],
+            // ),
+            Consumer<ApplicationState>(
+                builder: (context, appState, _) =>
+                    OrientationBuilder(builder: (context, orientation) {
                       return GridView.count(
-                        crossAxisCount:
-                            orientation == Orientation.portrait ? 2 : 3,
-                        padding: const EdgeInsets.all(16.0),
-                        childAspectRatio: 8.0 / 9.0,
-                        children: _buildGridCards(context),
-                      );
-                    })
-                  : ListView(
-                      padding: const EdgeInsets.all(8),
-                      children: _buildListCards(context),
-                    )),
-        ]));
+                          crossAxisCount:
+                              orientation == Orientation.portrait ? 2 : 3,
+                          padding: const EdgeInsets.all(16.0),
+                          childAspectRatio: 8.0 / 9.0,
+                          children:
+                              _buildGridCards(context, appState.products));
+                    })));
+  }
+}
+
+class StarRank extends StatelessWidget {
+  const StarRank({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return const Row(
+      children: [
+        Icon(
+          Icons.star,
+          color: Colors.yellow,
+          size: 20.0,
+        ),
+        Icon(
+          Icons.star,
+          color: Colors.yellow,
+          size: 20.0,
+        ),
+        Icon(
+          Icons.star,
+          color: Colors.yellow,
+          size: 20.0,
+        ),
+        Icon(
+          Icons.star,
+          color: Colors.yellow,
+          size: 20.0,
+        ),
+        Icon(
+          Icons.star,
+          color: Colors.yellow,
+          size: 20.0,
+        ),
+      ],
+    );
   }
 }

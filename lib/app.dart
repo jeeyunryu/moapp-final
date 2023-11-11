@@ -21,6 +21,7 @@ import 'signup.dart';
 import 'search.dart';
 import 'favorites.dart';
 import 'profile.dart';
+import 'addProduct.dart';
 
 class MyAppState extends ChangeNotifier {
   var favorites = <Hotel>[];
@@ -54,6 +55,7 @@ class ShrineApp extends StatelessWidget {
             '/search': (BuildContext context) => const SearchPage(),
             '/favorites': (BuildContext context) => const FavoritePage(),
             '/profile': (BuildContext context) => const MyPage(),
+            '/addProduct': (BuildContext context) => const AddProduct(),
           },
           // TODO: Customize the theme (103)
           theme: ThemeData.light(useMaterial3: true),

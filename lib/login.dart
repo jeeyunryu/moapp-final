@@ -12,8 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+
 import 'signup.dart';
+
+Future<UserCredential> signInWithGoogle() async {
+  // Trigger the authentication flow
+  final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+
+  // Obtain the auth details from the request
+  final GoogleSignInAuthentication? googleAuth =
+      await googleUser?.authentication;
+
+  // Create a new credential
+  final credential = GoogleAuthProvider.credential(
+    accessToken: googleAuth?.accessToken,
+    idToken: googleAuth?.idToken,
+  );
+
+  // Once signed in, return the UserCredential
+  return await FirebaseAuth.instance.signInWithCredential(credential);
+}
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -23,10 +44,6 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  // TODO: Add text editing controllers (101)
-  final _usernameController = TextEditingController();
-  final _passwordController = TextEditingController();
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -43,57 +60,34 @@ class _LoginPageState extends State<LoginPage> {
               ],
             ),
             const SizedBox(height: 120.0),
-            // TODO: Remove filled: true values (103)
-            // TODO: Add TextField widgets (101)
-            TextField(
-              controller: _usernameController,
-              decoration: const InputDecoration(
-                filled: true,
-                labelText: 'Username',
-              ),
-            ),
-            const SizedBox(height: 12.0),
-            TextField(
-              controller: _passwordController,
-              decoration: const InputDecoration(
-                filled: true,
-                labelText: 'Password',
-              ),
-              obscureText: true,
-            ),
-
-
-            // TODO: Add button bar (101)
-            OverflowBar(
-              alignment: MainAxisAlignment.end,
-              children: <Widget>[
-                TextButton(
-                  child: const Text('CANCEL'),
-                  onPressed: () {
-                    _usernameController.clear();
-                    _passwordController.clear();
-                  },
-                ),
-                TextButton(
-                  child: const Text('Sign Up'),
-                  onPressed: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => SignUpPage()));
-
-                  },
-                ),
-                ElevatedButton(
-                  child: const Text('Next'),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                ),
-              ],
-
-            )
+            ElevatedButton(
+                child: const Text('GOOGLE'),
+                onPressed: () async {
+                  await signInWithGoogle();
+                  Navigator.pop(context);
+                }),
+            ElevatedButton(
+                child: const Text('GUEST'),
+                onPressed: () async {
+                  try {
+                    final userCredential =
+                        await FirebaseAuth.instance.signInAnonymously();
+                    print("Signed in with temporary account.");
+                  } on FirebaseAuthException catch (e) {
+                    switch (e.code) {
+                      case "operation-not-allowed":
+                        print(
+                            "Anonymous auth hasn't been enabled for this project.");
+                        break;
+                      default:
+                        print("Unknown error.");
+                    }
+                  }
+                  Navigator.pop(context);
+                })
           ],
         ),
       ),
     );
   }
 }
-
