@@ -64,7 +64,7 @@ class _LoginPageState extends State<LoginPage> {
                 child: const Text('GOOGLE'),
                 onPressed: () async {
                   await signInWithGoogle();
-                  Navigator.pop(context);
+                  Navigator.pushNamed(context, '/');
                 }),
             ElevatedButton(
                 child: const Text('GUEST'),
@@ -83,7 +83,7 @@ class _LoginPageState extends State<LoginPage> {
                         print("Unknown error.");
                     }
                   }
-                  Navigator.pop(context);
+                  Navigator.pushNamed(context, '/');
                 })
           ],
         ),

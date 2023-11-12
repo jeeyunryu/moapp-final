@@ -69,7 +69,7 @@ class _HomePageState extends State<HomePage> {
             AspectRatio(
               aspectRatio: 18 / 11,
               child: Hero(
-                tag: product.name,
+                tag: product.docid,
                 child: product.imageurl != ''
                     ? Image.file(File(product.imageurl))
                     : Image.asset('assets/logo.png'),
@@ -117,8 +117,8 @@ class _HomePageState extends State<HomePage> {
                                         context,
                                         MaterialPageRoute(
                                             builder: (context) => DetailScreen(
-                                                product: product,
-                                                likedproduct: likedproducts)));
+                                                  productId: product.docid,
+                                                )));
                                   },
                                 ),
                               ),
@@ -144,6 +144,8 @@ class _HomePageState extends State<HomePage> {
       throw Exception('Could not launch $_url');
     }
   }
+
+  String dropdownValue = list.first;
 
   @override
   Widget build(BuildContext context) {
@@ -275,13 +277,51 @@ class _HomePageState extends State<HomePage> {
           Consumer<ApplicationState>(
               builder: (context, appState, _) =>
                   OrientationBuilder(builder: (context, orientation) {
-                    return GridView.count(
-                        crossAxisCount:
-                            orientation == Orientation.portrait ? 2 : 3,
-                        padding: const EdgeInsets.all(16.0),
-                        childAspectRatio: 8.0 / 9.0,
-                        children: _buildGridCards(context, appState.products,
-                            appState.likedproducts));
+                    return Column(
+                      children: [
+                        DropdownButton<String>(
+                          value: dropdownValue,
+                          icon: const Icon(Icons.arrow_downward),
+                          elevation: 16,
+                          style: const TextStyle(color: Colors.deepPurple),
+                          underline: Container(
+                            height: 2,
+                            color: Colors.deepPurpleAccent,
+                          ),
+                          onChanged: (String? value) {
+                            // This is called when the user selects an item.
+                            setState(() {
+                              dropdownValue = value!;
+                              if (value == 'DESC') {
+                                appState.isDesc = true;
+                              } else {
+                                appState.isDesc = false;
+                              }
+                              appState.changeOrder();
+                            });
+                          },
+                          items: list
+                              .map<DropdownMenuItem<String>>((String value) {
+                            return DropdownMenuItem<String>(
+                              value: value,
+                              child: Text(value),
+                            );
+                          }).toList(),
+                        ),
+                        Expanded(
+                          child: SizedBox(
+                            height: 200,
+                            child: GridView.count(
+                                crossAxisCount:
+                                    orientation == Orientation.portrait ? 2 : 3,
+                                padding: const EdgeInsets.all(16.0),
+                                childAspectRatio: 8.0 / 9.0,
+                                children: _buildGridCards(context,
+                                    appState.products, appState.likedproducts)),
+                          ),
+                        ),
+                      ],
+                    );
                   })),
     );
   }

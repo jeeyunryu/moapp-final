@@ -45,6 +45,16 @@ class ApplicationState extends ChangeNotifier {
   List<ProductList> get products => _products;
   List<LikedProduct> _likedproducts = [];
   List<LikedProduct> get likedproducts => _likedproducts;
+  bool _isDesc = false;
+  bool get isDesc => _isDesc;
+  set isDesc(bool isDesc) {
+    _isDesc = isDesc;
+  }
+
+  String _email = 'Anonymous';
+  String get email => _email;
+  String _imageurl = 'https://handong.edu/site/handong/res/img/logo.png';
+  String get imageurl => _imageurl;
 
   ApplicationState() {
     init();
@@ -69,6 +79,7 @@ class ApplicationState extends ChangeNotifier {
   }
 
   Future<void> editProduct(Product productLocal, ProductList product) async {
+    print('edit');
     if (FirebaseAuth.instance.currentUser!.uid == product.uid) {
       FirebaseFirestore.instance
           .collection('products')
@@ -110,51 +121,123 @@ class ApplicationState extends ChangeNotifier {
     }
   }
 
+  void changeOrder() {
+    FirebaseFirestore.instance
+        .collection('products')
+        .orderBy('price', descending: isDesc)
+        .snapshots()
+        .listen((snapshot) {
+      print('init.listen: iscalled!');
+      _products = [];
+      for (final document in snapshot.docs) {
+        final name = document.data()['name'];
+        print('init.listen: $name');
+        _products.add(
+          ProductList(
+            name: document.data()['name'] as String,
+            price: document.data()['price'] as int,
+            description: document.data()['description'] as String,
+            imageurl: document.data()['imageurl'] as String,
+            docid: document.id,
+            uid: document.data()['uid'] as String,
+            timestamp: document.data()['timestamp'] as int,
+            editedtime: document.data()['editedtime'] as int,
+            likes: document.data()['likes'] as int,
+          ),
+        );
+      }
+      notifyListeners();
+      // print(_products);
+    });
+  }
+
   Future<void> init() async {
+    print('init.init');
     await Firebase.initializeApp(
-        options: DefaultFirebaseOptions.currentPlatform);
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+
+    FirebaseFirestore.instance
+        .collection('products')
+        .orderBy('price', descending: isDesc)
+        .snapshots()
+        .listen((snapshot) {
+      print('init.listen: iscalled!');
+      _products = [];
+      for (final document in snapshot.docs) {
+        final name = document.data()['name'];
+        print('init.listen: $name');
+        _products.add(
+          ProductList(
+            name: document.data()['name'] as String,
+            price: document.data()['price'] as int,
+            description: document.data()['description'] as String,
+            imageurl: document.data()['imageurl'] as String,
+            docid: document.id,
+            uid: document.data()['uid'] as String,
+            timestamp: document.data()['timestamp'] as int,
+            editedtime: document.data()['editedtime'] as int,
+            likes: document.data()['likes'] as int,
+          ),
+        );
+      }
+      notifyListeners();
+      // print(_products);
+    });
+
+    FirebaseFirestore.instance
+        .collection('likes')
+        .snapshots()
+        .listen((snapshot) {
+      _likedproducts = [];
+      for (final document in snapshot.docs) {
+        if (FirebaseAuth.instance.currentUser!.uid == document.data()['uid']) {
+          _likedproducts.add(LikedProduct(
+            docid: document.data()['docid'] as String,
+          ));
+        }
+      }
+      print(_likedproducts);
+      notifyListeners();
+    });
 
     FirebaseAuth.instance.userChanges().listen((user) {
       if (user != null) {
-        _productListSubscription = FirebaseFirestore.instance
-            .collection('products')
-            .snapshots()
-            .listen((snapshot) {
-          _products = [];
-          for (final document in snapshot.docs) {
-            _products.add(
-              ProductList(
-                name: document.data()['name'] as String,
-                price: document.data()['price'] as int,
-                description: document.data()['description'] as String,
-                imageurl: document.data()['imageurl'] as String,
-                docid: document.id,
-                uid: document.data()['uid'] as String,
-                timestamp: document.data()['timestamp'] as int,
-                editedtime: document.data()['editedtime'] as int,
-                likes: document.data()['likes'] as int,
-              ),
-            );
-          }
-          notifyListeners();
-          // print(_products);
-        });
-        FirebaseFirestore.instance
-            .collection('likes')
-            .snapshots()
-            .listen((snapshot) {
-          _likedproducts = [];
-          for (final document in snapshot.docs) {
-            if (FirebaseAuth.instance.currentUser!.uid ==
-                document.data()['uid']) {
-              _likedproducts.add(LikedProduct(
-                docid: document.data()['docid'] as String,
-              ));
-            }
-          }
-          print(_likedproducts);
-          notifyListeners();
-        });
+        if (user.email != null) {
+          _email = user.email!;
+        }
+
+        if (user.photoURL != null) {
+          _imageurl = user.photoURL!;
+        }
+
+        print('email: ${user.email}');
+        print('image url: ${user.photoURL}');
+
+        // _productListSubscription = FirebaseFirestore.instance
+        //     .collection('products')
+        //     .orderBy('price', descending: isDesc)
+        //     .snapshots()
+        //     .listen((snapshot) {
+        //   _products = [];
+        //   for (final document in snapshot.docs) {
+        //     _products.add(
+        //       ProductList(
+        //         name: document.data()['name'] as String,
+        //         price: document.data()['price'] as int,
+        //         description: document.data()['description'] as String,
+        //         imageurl: document.data()['imageurl'] as String,
+        //         docid: document.id,
+        //         uid: document.data()['uid'] as String,
+        //         timestamp: document.data()['timestamp'] as int,
+        //         editedtime: document.data()['editedtime'] as int,
+        //         likes: document.data()['likes'] as int,
+        //       ),
+        //     );
+        //   }
+        //   notifyListeners();
+        //   // print(_products);
+        // });
       }
     });
   }

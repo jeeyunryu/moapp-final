@@ -8,9 +8,9 @@ import 'addProduct.dart';
 import 'app_state.dart';
 
 class EditPage extends StatefulWidget {
-  EditPage({super.key, required this.product});
+  EditPage({super.key, required this.productId});
 
-  final ProductList product;
+  final String productId;
 
   @override
   State<EditPage> createState() => _EditPageState();
@@ -41,66 +41,75 @@ class _EditPageState extends State<EditPage> {
 
   @override
   Widget build(BuildContext context) {
-    _controllername.text = widget.product.name;
-    _controllerprice.text = widget.product.price.toString();
-    _controllerdescription.text = widget.product.description;
+    return Consumer<ApplicationState>(builder: (context, appState, _) {
+      final product = appState.products
+          .firstWhere((element) => element.docid == widget.productId);
 
-    return Scaffold(
-        appBar: AppBar(
-          iconTheme: IconThemeData(
-            color: Colors.white, //change your color here
-          ),
-          centerTitle: true,
-          title: const Text(
-            'Detail',
-            style: TextStyle(color: Colors.white),
-          ),
-          backgroundColor: Colors.blue,
-          actions: [
-            Consumer<ApplicationState>(
-                builder: (context, appstate, _) => TextButton(
-                      child: const Text('Save'),
-                      onPressed: () {
-                        product_local.name = _controllername.text;
-                        product_local.price = int.parse(_controllerprice.text);
-                        product_local.description = _controllerdescription.text;
-                        if (_image != null) {
-                          product_local.imageurl = _image!.path;
-                        }
-                        appstate.editProduct(product_local, widget.product);
-                        Navigator.pop(context);
-                      },
-                    ))
-          ],
-        ),
-        body: ListView(
-          children: [
-            _buildPhotoArea(),
-            IconButton(
-              icon: const Icon(Icons.camera_alt),
-              onPressed: () {
-                getImage(ImageSource.gallery);
-              },
+      _controllername.text = product.name;
+      _controllerprice.text = product.price.toString();
+      _controllerdescription.text = product.description;
+
+      // final appstate = context.read<ApplicationState>();
+      return Scaffold(
+          appBar: AppBar(
+            iconTheme: IconThemeData(
+              color: Colors.white, //change your color here
             ),
-            TextFormField(controller: _controllername),
-            TextFormField(controller: _controllerprice),
-            // Text(widget.product.name),
+            centerTitle: true,
+            title: const Text(
+              'Detail',
+              style: TextStyle(color: Colors.white),
+            ),
+            backgroundColor: Colors.blue,
+            actions: [
+              TextButton(
+                child: const Text('Save'),
+                onPressed: () {
+                  product_local.name = _controllername.text;
+                  product_local.price = int.parse(_controllerprice.text);
+                  product_local.description = _controllerdescription.text;
+                  if (_image != null) {
+                    product_local.imageurl = _image!.path;
+                  }
+                  appState.editProduct(product_local, product);
+                  Navigator.pop(context);
+                },
+              )
+            ],
+          ),
+          body: ListView(
+            children: [
+              _buildPhotoArea(),
+              IconButton(
+                icon: const Icon(Icons.camera_alt),
+                onPressed: () {
+                  getImage(ImageSource.gallery);
+                },
+              ),
+              TextFormField(controller: _controllername),
+              TextFormField(controller: _controllerprice),
+              // Text(widget.product.name),
 
-            Divider(color: Colors.black, thickness: 0.7),
-            TextFormField(controller: _controllerdescription),
-          ],
-        ));
+              Divider(color: Colors.black, thickness: 0.7),
+              TextFormField(controller: _controllerdescription),
+            ],
+          ));
+    });
   }
 
   Widget _buildPhotoArea() {
-    return _image != null
-        ? Container(
-            width: 300,
-            height: 300,
-            child: Image.file(File(_image!.path)),
-          )
-        : widget.product.imageurl != ''
-            ? Image.file(File(widget.product.imageurl))
-            : Image.asset('assets/logo.png');
+    return Consumer<ApplicationState>(builder: (context, appState, _) {
+      final product = appState.products
+          .firstWhere((element) => element.docid == widget.productId);
+      return _image != null
+          ? Container(
+              width: 300,
+              height: 300,
+              child: Image.file(File(_image!.path)),
+            )
+          : product.imageurl != ''
+              ? Image.file(File(product.imageurl))
+              : Image.asset('assets/logo.png');
+    });
   }
 }

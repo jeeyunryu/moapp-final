@@ -10,34 +10,59 @@ import 'app_state.dart';
 import 'edit.dart';
 
 class DetailScreen extends StatefulWidget {
-  const DetailScreen(
-      {super.key, required this.product, required this.likedproduct});
+  const DetailScreen({
+    super.key,
+    required this.productId,
+  });
 
   // final Hotel hotel;
-  final ProductList product;
-  final List<LikedProduct> likedproduct;
+
+  final String productId;
 
   @override
   State<DetailScreen> createState() => _DetailScreenState();
 }
 
 class _DetailScreenState extends State<DetailScreen> {
+  // String productId = '';
+  // ProductList? product;
+
+  // @override
+  // void initState() {
+  //   // product = widget.product;
+  //   productId = widget.product.docid;
+  //   super.initState();
+  // }
+
+  // @override
+  // void didUpdateWidget(covariant DetailScreen oldWidget) {
+  //   // TODO: implement didUpdateWidget
+  //   setState(() {
+  //     product = widget.product;
+  //   });
+  //   super.didUpdateWidget(oldWidget);
+  // }
+
   @override
   Widget build(BuildContext context) {
     IconData icon;
 
-    bool isLiked() {
-      for (var p in widget.likedproduct) {
-        if (widget.product.docid == p.docid) {
-          return true;
-        }
-      }
-      return false;
-    }
+    return Consumer<ApplicationState>(builder: (context, appState, _) {
+      final product = appState.products
+          .firstWhere((element) => element.docid == widget.productId);
 
-    return Scaffold(
+      bool isLiked() {
+        for (var p in appState.likedproducts) {
+          if (product.docid == p.docid) {
+            return true;
+          }
+        }
+        return false;
+      }
+
+      return Scaffold(
         appBar: AppBar(
-          iconTheme: IconThemeData(
+          iconTheme: const IconThemeData(
             color: Colors.white, //change your color here
           ),
           centerTitle: true,
@@ -48,69 +73,67 @@ class _DetailScreenState extends State<DetailScreen> {
           backgroundColor: Colors.blue,
           actions: [
             IconButton(
-              icon: Icon(Icons.create),
+              icon: const Icon(Icons.create),
               onPressed: () {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
                         builder: (context) =>
-                            EditPage(product: widget.product)));
+                            EditPage(productId: product.docid)));
               },
             ),
-            Consumer<ApplicationState>(
-              builder: (context, appState, _) => IconButton(
-                icon: Icon(Icons.delete),
-                onPressed: () {
-                  appState.deleteProduct(widget.product);
-                  Navigator.pop(context);
-                },
-              ),
-            )
+            IconButton(
+              icon: const Icon(Icons.delete),
+              onPressed: () {
+                appState.deleteProduct(product);
+                Navigator.pop(context);
+              },
+            ),
           ],
         ),
         body: ListView(
           children: [
-            widget.product.imageurl != ''
-                ? Image.file(File(widget.product.imageurl))
+            product.imageurl != ''
+                ? Image.file(File(product.imageurl))
                 : Image.asset('assets/logo.png'),
             Row(
               children: [
                 Expanded(
-                  child: Text(widget.product.name),
+                  child: Text(product.name),
                 ),
-                Consumer<ApplicationState>(
-                  builder: (context, appState, _) => IconButton(
-                    icon: isLiked()
-                        ? Icon(Icons.thumb_up, color: Colors.red)
-                        : Icon(Icons.thumb_up_outlined, color: Colors.red),
-                    onPressed: () {
-                      if (!isLiked()) {
-                        appState.likesIncrement(widget.product);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('I LIKE IT!')));
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                            content: Text('You can only do it once !!')));
-                      }
-                    },
-                  ),
+                IconButton(
+                  icon: isLiked()
+                      ? Icon(Icons.thumb_up, color: Colors.red)
+                      : Icon(Icons.thumb_up_outlined, color: Colors.red),
+                  onPressed: () {
+                    if (!isLiked()) {
+                      appState.likesIncrement(product);
+                      ScaffoldMessenger.of(context)
+                          .showSnackBar(SnackBar(content: Text('I LIKE IT!')));
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          content: Text('You can only do it once !!')));
+                    }
+                  },
                 ),
-                Text(widget.product.likes.toString()),
+                Text(product.likes.toString()),
               ],
             ),
-            Text('\$ ' + widget.product.price.toString()),
+            Text('\$ ' + product.price.toString()),
             Divider(color: Colors.black, thickness: 0.7),
             Text(
-              widget.product.description,
+              product.description,
               style: TextStyle(color: Colors.blue),
             ),
-            Text('creator:  ${widget.product.uid}'),
+            Text('creator:  ${product.uid}'),
             Text(
-                '${DateTime.fromMillisecondsSinceEpoch(widget.product.timestamp)} Created'),
-            if (widget.product.editedtime != 0)
+                '${DateTime.fromMillisecondsSinceEpoch(product.timestamp)} Created'),
+            if (product.editedtime != 0)
               Text(
-                  '${DateTime.fromMillisecondsSinceEpoch(widget.product.editedtime)} Modified'),
+                  '${DateTime.fromMillisecondsSinceEpoch(product.editedtime)} Modified'),
           ],
-        ));
+        ),
+      );
+    });
   }
 }
