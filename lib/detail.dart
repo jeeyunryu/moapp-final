@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -9,10 +10,12 @@ import 'app_state.dart';
 import 'edit.dart';
 
 class DetailScreen extends StatefulWidget {
-  DetailScreen({super.key, required this.product});
+  const DetailScreen(
+      {super.key, required this.product, required this.likedproduct});
 
   // final Hotel hotel;
   final ProductList product;
+  final List<LikedProduct> likedproduct;
 
   @override
   State<DetailScreen> createState() => _DetailScreenState();
@@ -22,6 +25,15 @@ class _DetailScreenState extends State<DetailScreen> {
   @override
   Widget build(BuildContext context) {
     IconData icon;
+
+    bool isLiked() {
+      for (var p in widget.likedproduct) {
+        if (widget.product.docid == p.docid) {
+          return true;
+        }
+      }
+      return false;
+    }
 
     return Scaffold(
         appBar: AppBar(
@@ -68,11 +80,11 @@ class _DetailScreenState extends State<DetailScreen> {
                 ),
                 Consumer<ApplicationState>(
                   builder: (context, appState, _) => IconButton(
-                    icon: appState.isLiked(widget.product)
+                    icon: isLiked()
                         ? Icon(Icons.thumb_up, color: Colors.red)
                         : Icon(Icons.thumb_up_outlined, color: Colors.red),
                     onPressed: () {
-                      if (!appState.isLiked(widget.product)) {
+                      if (!isLiked()) {
                         appState.likesIncrement(widget.product);
                         ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text('I LIKE IT!')));

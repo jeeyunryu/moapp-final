@@ -26,6 +26,8 @@ import 'detail.dart';
 import 'model/product.dart';
 import 'model/products_repository.dart';
 
+const List<String> list = <String>['ASC', 'DESC'];
+
 const List<Widget> icons = <Widget>[
   Icon(Icons.list),
   Icon(Icons.grid_view),
@@ -56,7 +58,8 @@ class _HomePageState extends State<HomePage> {
 
   bool isGridView = true;
 
-  List<Card> _buildGridCards(BuildContext context, List<ProductList> products) {
+  List<Card> _buildGridCards(BuildContext context, List<ProductList> products,
+      List<LikedProduct> likedproducts) {
     return products.map((product) {
       return Card(
         clipBehavior: Clip.antiAlias,
@@ -114,7 +117,8 @@ class _HomePageState extends State<HomePage> {
                                         context,
                                         MaterialPageRoute(
                                             builder: (context) => DetailScreen(
-                                                product: product)));
+                                                product: product,
+                                                likedproduct: likedproducts)));
                                   },
                                 ),
                               ),
@@ -144,141 +148,142 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        drawer: Drawer(
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.only(
-                topRight: Radius.circular(0),
-                bottomRight: Radius.circular(0),
+      drawer: Drawer(
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.only(
+              topRight: Radius.circular(0),
+              bottomRight: Radius.circular(0),
+            ),
+          ),
+          child: ListView(padding: EdgeInsets.zero, children: [
+            const DrawerHeader(
+              decoration: BoxDecoration(
+                color: Colors.lightBlue,
+              ),
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(10, 90, 0, 0),
+                child: Text('Pages',
+                    style: TextStyle(color: Colors.white, fontSize: 25)),
               ),
             ),
-            child: ListView(padding: EdgeInsets.zero, children: [
-              const DrawerHeader(
-                decoration: BoxDecoration(
-                  color: Colors.lightBlue,
-                ),
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(10, 90, 0, 0),
-                  child: Text('Pages',
-                      style: TextStyle(color: Colors.white, fontSize: 25)),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: 10),
-                child: ListTile(
-                    leading: const Icon(Icons.home, color: Colors.lightBlue),
-                    title: const Text('Home'),
-                    onTap: () {
-                      Navigator.pushNamed(context, '/');
-                    }),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: 10),
-                child: ListTile(
-                    leading: const Icon(Icons.search, color: Colors.lightBlue),
-                    title: const Text('Search'),
-                    onTap: () {
-                      Navigator.pushNamed(context, '/search');
-                    }),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: 10),
-                child: ListTile(
-                    leading: const Icon(Icons.location_city,
-                        color: Colors.lightBlue),
-                    title: const Text('Favorite Hotel'),
-                    onTap: () {
-                      Navigator.pushNamed(context, '/favorites');
-                    }),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: 10),
-                child: ListTile(
-                    leading: const Icon(Icons.person, color: Colors.lightBlue),
-                    title: const Text('My Page'),
-                    onTap: () {
-                      Navigator.pushNamed(context, '/profile');
-                    }),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: 10),
-                child: ListTile(
-                    leading: const Icon(Icons.logout, color: Colors.lightBlue),
-                    title: const Text('Log Out'),
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.pushNamed(context, '/login');
-                    }),
-              ),
-            ])),
-        appBar: AppBar(
-          leading: Builder(
-            builder: (BuildContext context) {
-              return IconButton(
-                icon: const Icon(
-                  Icons.person,
-                  semanticLabel: 'profile',
-                  color: Colors.white,
-                ),
-                onPressed: () {
-                  // Scaffold.of(context).openDrawer();
-                  Navigator.pushNamed(context, '/profile');
-                },
-              );
-            },
-          ),
-          centerTitle: true,
-          backgroundColor: Colors.blue,
-          title: const Text('Main', style: TextStyle(color: Colors.white)),
-          actions: <Widget>[
-            IconButton(
+            Padding(
+              padding: const EdgeInsets.only(left: 10),
+              child: ListTile(
+                  leading: const Icon(Icons.home, color: Colors.lightBlue),
+                  title: const Text('Home'),
+                  onTap: () {
+                    Navigator.pushNamed(context, '/');
+                  }),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 10),
+              child: ListTile(
+                  leading: const Icon(Icons.search, color: Colors.lightBlue),
+                  title: const Text('Search'),
+                  onTap: () {
+                    Navigator.pushNamed(context, '/search');
+                  }),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 10),
+              child: ListTile(
+                  leading:
+                      const Icon(Icons.location_city, color: Colors.lightBlue),
+                  title: const Text('Favorite Hotel'),
+                  onTap: () {
+                    Navigator.pushNamed(context, '/favorites');
+                  }),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 10),
+              child: ListTile(
+                  leading: const Icon(Icons.person, color: Colors.lightBlue),
+                  title: const Text('My Page'),
+                  onTap: () {
+                    Navigator.pushNamed(context, '/profile');
+                  }),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 10),
+              child: ListTile(
+                  leading: const Icon(Icons.logout, color: Colors.lightBlue),
+                  title: const Text('Log Out'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.pushNamed(context, '/login');
+                  }),
+            ),
+          ])),
+      appBar: AppBar(
+        leading: Builder(
+          builder: (BuildContext context) {
+            return IconButton(
               icon: const Icon(
-                Icons.add,
-                semanticLabel: 'add',
+                Icons.person,
+                semanticLabel: 'profile',
                 color: Colors.white,
               ),
               onPressed: () {
-                Navigator.pushNamed(context, '/addProduct');
+                // Scaffold.of(context).openDrawer();
+                Navigator.pushNamed(context, '/profile');
               },
-            ),
-          ],
+            );
+          },
         ),
-        body:
-            // Row(
-            //   mainAxisAlignment: MainAxisAlignment.end,
-            //   children: [
-            //     Padding(
-            //       padding: const EdgeInsets.only(right: 18.0, top: 10.0),
-            //       child: ToggleButtons(
-            //         borderRadius: BorderRadius.circular(5),
-            //         selectedBorderColor: Colors.blue,
-            //         selectedColor: Colors.blue,
-            //         fillColor: Colors.white10,
-            //         direction: Axis.horizontal,
-            //         onPressed: (int index) {
-            //           setState(() {
-            //             isGridView = index == 1;
-            //             // for (int i = 0; i < _selectedView.length; i++) {
-            //             //   _selectedView[i] = i == index;
-            //             // }
-            //           });
-            //         },
-            //         children: icons,
-            //         isSelected: [!isGridView, isGridView],
-            //       ),
-            //     ),
-            //   ],
-            // ),
-            Consumer<ApplicationState>(
-                builder: (context, appState, _) =>
-                    OrientationBuilder(builder: (context, orientation) {
-                      return GridView.count(
-                          crossAxisCount:
-                              orientation == Orientation.portrait ? 2 : 3,
-                          padding: const EdgeInsets.all(16.0),
-                          childAspectRatio: 8.0 / 9.0,
-                          children:
-                              _buildGridCards(context, appState.products));
-                    })));
+        centerTitle: true,
+        backgroundColor: Colors.blue,
+        title: const Text('Main', style: TextStyle(color: Colors.white)),
+        actions: <Widget>[
+          IconButton(
+            icon: const Icon(
+              Icons.add,
+              semanticLabel: 'add',
+              color: Colors.white,
+            ),
+            onPressed: () {
+              Navigator.pushNamed(context, '/addProduct');
+            },
+          ),
+        ],
+      ),
+      body:
+          // Row(
+          //   mainAxisAlignment: MainAxisAlignment.end,
+          //   children: [
+          //     Padding(
+          //       padding: const EdgeInsets.only(right: 18.0, top: 10.0),
+          //       child: ToggleButtons(
+          //         borderRadius: BorderRadius.circular(5),
+          //         selectedBorderColor: Colors.blue,
+          //         selectedColor: Colors.blue,
+          //         fillColor: Colors.white10,
+          //         direction: Axis.horizontal,
+          //         onPressed: (int index) {
+          //           setState(() {
+          //             isGridView = index == 1;
+          //             // for (int i = 0; i < _selectedView.length; i++) {
+          //             //   _selectedView[i] = i == index;
+          //             // }
+          //           });
+          //         },
+          //         children: icons,
+          //         isSelected: [!isGridView, isGridView],
+          //       ),
+          //     ),
+          //   ],
+          // ),
+          Consumer<ApplicationState>(
+              builder: (context, appState, _) =>
+                  OrientationBuilder(builder: (context, orientation) {
+                    return GridView.count(
+                        crossAxisCount:
+                            orientation == Orientation.portrait ? 2 : 3,
+                        padding: const EdgeInsets.all(16.0),
+                        childAspectRatio: 8.0 / 9.0,
+                        children: _buildGridCards(context, appState.products,
+                            appState.likedproducts));
+                  })),
+    );
   }
 }
 

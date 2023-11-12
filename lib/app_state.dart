@@ -32,30 +32,22 @@ class ProductList {
   int likes;
 }
 
+class LikedProduct {
+  LikedProduct({
+    required this.docid,
+  });
+  String docid;
+}
+
 class ApplicationState extends ChangeNotifier {
   StreamSubscription<QuerySnapshot>? _productListSubscription;
   List<ProductList> _products = [];
   List<ProductList> get products => _products;
+  List<LikedProduct> _likedproducts = [];
+  List<LikedProduct> get likedproducts => _likedproducts;
 
   ApplicationState() {
     init();
-  }
-
-  bool isLiked(ProductList product) {
-    bool result = false;
-
-    FirebaseFirestore.instance
-        .collection(product.docid)
-        .snapshots()
-        .listen((snapshot) {
-      for (final document in snapshot.docs) {
-        if (FirebaseAuth.instance.currentUser!.uid == document.data()['uid']) {
-          result = true;
-        }
-      }
-    });
-
-    return result;
   }
 
   Future<DocumentReference> addProduct(Product product) {
@@ -91,7 +83,7 @@ class ApplicationState extends ChangeNotifier {
     }
   }
 
-  likesIncrement(ProductList product) {
+  Future<void> likesIncrement(ProductList product) async {
     FirebaseFirestore.instance
         .collection('products')
         .doc(product.docid)
@@ -99,8 +91,9 @@ class ApplicationState extends ChangeNotifier {
       'likes': product.likes++,
     });
 
-    FirebaseFirestore.instance.collection(product.docid).add(<String, dynamic>{
+    FirebaseFirestore.instance.collection('likes').add(<String, dynamic>{
       'uid': FirebaseAuth.instance.currentUser!.uid,
+      'docid': product.docid,
     });
   }
 
@@ -145,6 +138,22 @@ class ApplicationState extends ChangeNotifier {
           }
           notifyListeners();
           // print(_products);
+        });
+        FirebaseFirestore.instance
+            .collection('likes')
+            .snapshots()
+            .listen((snapshot) {
+          _likedproducts = [];
+          for (final document in snapshot.docs) {
+            if (FirebaseAuth.instance.currentUser!.uid ==
+                document.data()['uid']) {
+              _likedproducts.add(LikedProduct(
+                docid: document.data()['docid'] as String,
+              ));
+            }
+          }
+          print(_likedproducts);
+          notifyListeners();
         });
       }
     });
