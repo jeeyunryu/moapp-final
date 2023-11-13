@@ -128,7 +128,7 @@ class ApplicationState extends ChangeNotifier {
         .collection('products')
         .doc(product.docid)
         .update({
-      'likes': product.likes++,
+      'likes': product.likes + 1,
     });
 
     FirebaseFirestore.instance.collection('likes').add(<String, dynamic>{

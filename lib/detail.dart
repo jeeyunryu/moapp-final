@@ -48,8 +48,9 @@ class _DetailScreenState extends State<DetailScreen> {
     IconData icon;
 
     return Consumer<ApplicationState>(builder: (context, appState, _) {
-      final product = appState.products
-          .firstWhere((element) => element.docid == widget.productId);
+      final product = appState.products.firstWhere(
+          (element) => element.docid == widget.productId,
+          orElse: () => appState.products.first);
 
       bool isLiked() {
         for (var p in appState.likedproducts) {
@@ -100,7 +101,7 @@ class _DetailScreenState extends State<DetailScreen> {
                 // }
                 appState.deleteProduct(product);
 
-                Navigator.pop(context);
+                Navigator.pushNamed(context, '/');
               },
             ),
           ],
