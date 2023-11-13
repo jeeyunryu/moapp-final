@@ -108,7 +108,7 @@ class _DetailScreenState extends State<DetailScreen> {
         ),
         body: ListView(
           children: [
-            product.imageurl != ''
+            product.imageurl != 'assets/logo.png'
                 ? Image.file(File(product.imageurl))
                 : Image.asset('assets/logo.png'),
             Row(

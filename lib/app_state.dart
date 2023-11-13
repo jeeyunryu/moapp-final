@@ -22,6 +22,7 @@ class ProductList {
     required this.timestamp,
     required this.editedtime,
     required this.likes,
+    required this.urltostorage,
   });
 
   String name;
@@ -33,6 +34,7 @@ class ProductList {
   int timestamp;
   int editedtime;
   int likes;
+  String urltostorage;
 }
 
 class LikedProduct {
@@ -79,9 +81,16 @@ class ApplicationState extends ChangeNotifier {
     init();
   }
 
-  void addProduct(Product product) {
+  Future<void> addProduct(Product product) async {
     int _products = 0;
+
     // int get products => _products;
+    final storageRef = FirebaseStorage.instance.ref();
+    final photoRef = storageRef.child("images/${product.imageurl}");
+    String filePath = product.imageurl;
+    File file = File(filePath);
+    photoRef.putFile(file);
+    print('downloaded url: ${photoRef.getDownloadURL()}');
 
     FirebaseFirestore.instance.collection('products').add(<String, dynamic>{
       'name': product.name,
@@ -92,13 +101,8 @@ class ApplicationState extends ChangeNotifier {
       'timestamp': DateTime.now().millisecondsSinceEpoch,
       'editedtime': 0,
       'likes': 0,
-    }).then((DocumentReference) async {
-      final storageRef = FirebaseStorage.instance.ref();
-      final photoRef = storageRef.child("images/${product.imageurl}");
-      String filePath = product.imageurl;
-      File file = File(filePath);
-      await photoRef.putFile(file);
-    });
+      'urltostorage': await photoRef.getDownloadURL(),
+    }).then((DocumentReference) async {});
 
 //     try {
 //   await photoRef.putFile(file);
@@ -183,6 +187,7 @@ class ApplicationState extends ChangeNotifier {
             timestamp: document.data()['timestamp'] as int,
             editedtime: document.data()['editedtime'] as int,
             likes: document.data()['likes'] as int,
+            urltostorage: document.data()['urltostorage'] as String,
           ),
         );
       }
@@ -216,6 +221,7 @@ class ApplicationState extends ChangeNotifier {
       for (final document in snapshot.docs) {
         final name = document.data()['name'];
         print('init.listen: $name');
+
         _products.add(
           ProductList(
             name: document.data()['name'] as String,
@@ -227,6 +233,7 @@ class ApplicationState extends ChangeNotifier {
             timestamp: document.data()['timestamp'] as int,
             editedtime: document.data()['editedtime'] as int,
             likes: document.data()['likes'] as int,
+            urltostorage: document.data()['urltostorage'] as String,
           ),
         );
       }
