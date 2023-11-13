@@ -22,6 +22,7 @@ import 'search.dart';
 import 'favorites.dart';
 import 'profile.dart';
 import 'addProduct.dart';
+import 'wishlist.dart';
 
 class MyAppState extends ChangeNotifier {
   var favorites = <Hotel>[];
@@ -49,13 +50,13 @@ class ShrineApp extends StatelessWidget {
           initialRoute: '/login',
           routes: {
             '/login': (BuildContext context) => const LoginPage(),
-            // TODO: Change to a Backdrop with a HomePage frontLayer (104)
             '/': (BuildContext context) => const HomePage(),
             '/signUp': (BuildContext context) => const SignUpPage(),
             '/search': (BuildContext context) => const SearchPage(),
             '/favorites': (BuildContext context) => const FavoritePage(),
             '/profile': (BuildContext context) => const MyPage(),
             '/addProduct': (BuildContext context) => const AddProduct(),
+            '/wish': (BuildContext context) => const WishlistPage(),
           },
           // TODO: Customize the theme (103)
           theme: ThemeData.light(useMaterial3: true),

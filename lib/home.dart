@@ -14,17 +14,13 @@
 
 import 'dart:io';
 
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:animated_text_kit/animated_text_kit.dart';
-import 'package:shrine/app.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:provider/provider.dart';
 
 import 'app_state.dart';
 import 'detail.dart';
-import 'model/product.dart';
-import 'model/products_repository.dart';
 
 const List<String> list = <String>['ASC', 'DESC'];
 
@@ -59,77 +55,100 @@ class _HomePageState extends State<HomePage> {
   bool isGridView = true;
 
   List<Card> _buildGridCards(BuildContext context, List<ProductList> products,
-      List<LikedProduct> likedproducts) {
+      List<LikedProduct> likedproducts, List<ProductInWishlist> wishlist) {
     return products.map((product) {
+      bool isWished = false;
+      String imageUrl = '';
+      for (var p in wishlist) {
+        if (product.docid == p.productdocid) {
+          isWished = true;
+        }
+      }
+      // Future<void> getImageUrl(String imageurl) async {
+      //   final storageRef = FirebaseStorage.instance.ref();
+      //   imageUrl = await storageRef.child("images/$imageurl").getDownloadURL();
+      // }
+
+      // getImageUrl(product.imageurl);
+
       return Card(
         clipBehavior: Clip.antiAlias,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            AspectRatio(
-              aspectRatio: 18 / 11,
-              child: Hero(
-                tag: product.docid,
-                child: product.imageurl != ''
-                    ? Image.file(File(product.imageurl))
-                    : Image.asset('assets/logo.png'),
-              ),
-            ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(0.0, 0.0, 16.0, 8.0),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 100,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Padding(
-                            padding: const EdgeInsets.only(top: 5),
-                            child: Text(
-                              product.name,
-
-                              // style: theme.textTheme.bodySmall,
-                              style: TextStyle(fontWeight: FontWeight.bold),
-
-                              maxLines: 1,
-                            ),
-                          ),
-                          Row(
-                            children: [
-                              Container(
-                                width: 35,
+        child: Stack(
+          children: [
+            if (isWished)
+              Container(
+                  alignment: Alignment.topRight, child: Icon(Icons.check_box)),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                AspectRatio(
+                  aspectRatio: 18 / 11,
+                  child: Hero(
+                    tag: product.docid,
+                    // child: Image.network(imageUrl),
+                    child: product.imageurl != ''
+                        ? Image.file(File(product.imageurl))
+                        : Image.asset('assets/logo.png'),
+                  ),
+                ),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(0.0, 0.0, 16.0, 8.0),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 100,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Padding(
+                                padding: const EdgeInsets.only(top: 5),
                                 child: Text(
-                                  '\$ ${product.price.toString()}',
-                                  // style: TextStyle(fontSize: 4),
+                                  product.name,
+
+                                  // style: theme.textTheme.bodySmall,
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+
+                                  maxLines: 1,
                                 ),
                               ),
-                              Container(
-                                height: 35,
-                                width: 60,
-                                child: TextButton(
-                                  child: Text(
-                                    'more',
+                              Row(
+                                children: [
+                                  Container(
+                                    width: 35,
+                                    child: Text(
+                                      '\$ ${product.price.toString()}',
+                                      // style: TextStyle(fontSize: 4),
+                                    ),
                                   ),
-                                  onPressed: () {
-                                    Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) => DetailScreen(
-                                                  productId: product.docid,
-                                                )));
-                                  },
-                                ),
+                                  Container(
+                                    height: 35,
+                                    width: 60,
+                                    child: TextButton(
+                                      child: Text(
+                                        'more',
+                                      ),
+                                      onPressed: () {
+                                        Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (context) =>
+                                                    DetailScreen(
+                                                      productId: product.docid,
+                                                    )));
+                                      },
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ),
           ],
         ),
@@ -238,6 +257,16 @@ class _HomePageState extends State<HomePage> {
         actions: <Widget>[
           IconButton(
             icon: const Icon(
+              Icons.shopping_cart,
+              semanticLabel: 'wishlist',
+              color: Colors.white,
+            ),
+            onPressed: () {
+              Navigator.pushNamed(context, '/wish');
+            },
+          ),
+          IconButton(
+            icon: const Icon(
               Icons.add,
               semanticLabel: 'add',
               color: Colors.white,
@@ -274,55 +303,54 @@ class _HomePageState extends State<HomePage> {
           //     ),
           //   ],
           // ),
-          Consumer<ApplicationState>(
-              builder: (context, appState, _) =>
-                  OrientationBuilder(builder: (context, orientation) {
-                    return Column(
-                      children: [
-                        DropdownButton<String>(
-                          value: dropdownValue,
-                          icon: const Icon(Icons.arrow_downward),
-                          elevation: 16,
-                          style: const TextStyle(color: Colors.deepPurple),
-                          underline: Container(
-                            height: 2,
-                            color: Colors.deepPurpleAccent,
-                          ),
-                          onChanged: (String? value) {
-                            // This is called when the user selects an item.
-                            setState(() {
-                              dropdownValue = value!;
-                              if (value == 'DESC') {
-                                appState.isDesc = true;
-                              } else {
-                                appState.isDesc = false;
-                              }
-                              appState.changeOrder();
-                            });
-                          },
-                          items: list
-                              .map<DropdownMenuItem<String>>((String value) {
-                            return DropdownMenuItem<String>(
-                              value: value,
-                              child: Text(value),
-                            );
-                          }).toList(),
-                        ),
-                        Expanded(
-                          child: SizedBox(
-                            height: 200,
-                            child: GridView.count(
-                                crossAxisCount:
-                                    orientation == Orientation.portrait ? 2 : 3,
-                                padding: const EdgeInsets.all(16.0),
-                                childAspectRatio: 8.0 / 9.0,
-                                children: _buildGridCards(context,
-                                    appState.products, appState.likedproducts)),
-                          ),
-                        ),
-                      ],
-                    );
-                  })),
+          Consumer<ApplicationState>(builder: (context, appState, _) {
+        return OrientationBuilder(builder: (context, orientation) {
+          return Column(
+            children: [
+              DropdownButton<String>(
+                value: dropdownValue,
+                icon: const Icon(Icons.arrow_downward),
+                elevation: 16,
+                style: const TextStyle(color: Colors.deepPurple),
+                underline: Container(
+                  height: 2,
+                  color: Colors.deepPurpleAccent,
+                ),
+                onChanged: (String? value) {
+                  // This is called when the user selects an item.
+                  setState(() {
+                    dropdownValue = value!;
+                    if (value == 'DESC') {
+                      appState.isDesc = true;
+                    } else {
+                      appState.isDesc = false;
+                    }
+                    appState.changeOrder();
+                  });
+                },
+                items: list.map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+              ),
+              Expanded(
+                child: SizedBox(
+                  height: 200,
+                  child: GridView.count(
+                      crossAxisCount:
+                          orientation == Orientation.portrait ? 2 : 3,
+                      padding: const EdgeInsets.all(16.0),
+                      childAspectRatio: 8.0 / 9.0,
+                      children: _buildGridCards(context, appState.products,
+                          appState.likedproducts, appState.wishlist)),
+                ),
+              ),
+            ],
+          );
+        });
+      }),
     );
   }
 }

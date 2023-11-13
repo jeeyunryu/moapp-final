@@ -60,6 +60,14 @@ class _DetailScreenState extends State<DetailScreen> {
         return false;
       }
 
+      bool isWished = false;
+
+      for (var p in appState.wishlist) {
+        if (product.docid == p.productdocid) {
+          isWished = true;
+        }
+      }
+
       return Scaffold(
         appBar: AppBar(
           iconTheme: const IconThemeData(
@@ -85,7 +93,13 @@ class _DetailScreenState extends State<DetailScreen> {
             IconButton(
               icon: const Icon(Icons.delete),
               onPressed: () {
+                // for (var p in appState.wishlist) {
+                //   if (product.docid == p.docid) {
+                //     appState.deleteFromWishlist(p);
+                //   }
+                // }
                 appState.deleteProduct(product);
+
                 Navigator.pop(context);
               },
             ),
@@ -133,6 +147,15 @@ class _DetailScreenState extends State<DetailScreen> {
                   '${DateTime.fromMillisecondsSinceEpoch(product.editedtime)} Modified'),
           ],
         ),
+        floatingActionButton: FloatingActionButton(
+            onPressed: () {
+              if (!isWished) {
+                appState.addToWishlist(product);
+              }
+            },
+            child: !isWished
+                ? const Icon(Icons.shopping_cart)
+                : const Icon(Icons.check)),
       );
     });
   }

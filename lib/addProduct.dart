@@ -1,5 +1,10 @@
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
@@ -33,12 +38,14 @@ class _AddProductState extends State<AddProduct> {
   final _controllername = TextEditingController();
   final _controllerprice = TextEditingController();
   final _controllerdescription = TextEditingController();
+  String imageUrl = '';
 
   XFile? _image;
   final ImagePicker picker = ImagePicker();
 
   Future getImage(ImageSource imageSource) async {
     final XFile? pickedFile = await picker.pickImage(source: imageSource);
+
     if (pickedFile != null) {
       setState(() {
         _image = XFile(pickedFile.path);
@@ -46,8 +53,21 @@ class _AddProductState extends State<AddProduct> {
     }
   }
 
+  // Future<void> getimageurl() async {
+  //   print('inside function');
+  //   final storageRef = FirebaseStorage.instance.ref();
+  //   // final imageUrl =  await storageRef.child("images/${product.imageurl}").getDownloadURL();
+  //   if (_image == null) {
+  //     imageUrl = await storageRef.child("images/logo.png").getDownloadURL();
+  //   } else {
+  //     imageUrl =
+  //         await storageRef.child("images/${product.imageurl}").getDownloadURL();
+  //   }
+  // }
+
   @override
   Widget build(BuildContext context) {
+    // getimageurl();
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -59,8 +79,8 @@ class _AddProductState extends State<AddProduct> {
           child: const Text('Cancel'),
         ),
         actions: [
-          Consumer<ApplicationState>(
-            builder: (context, appState, _) => TextButton(
+          Consumer<ApplicationState>(builder: (context, appState, _) {
+            return TextButton(
               onPressed: () {
                 product.name = _controllername.text;
                 product.price = int.parse(_controllerprice.text);
@@ -68,17 +88,18 @@ class _AddProductState extends State<AddProduct> {
                 if (_image != null) {
                   product.imageurl = _image!.path;
                 } else {
-                  product.imageurl = '';
+                  product.imageurl = 'assets/logo.png';
                 }
                 appState.addProduct(product);
                 _controllername.clear();
                 _controllerprice.clear();
                 _controllerdescription.clear();
+                // getimageurl();
                 Navigator.pop(context);
               },
               child: const Text('Save'),
-            ),
-          )
+            );
+          }),
         ],
       ),
       body: ListView(children: [
@@ -87,6 +108,7 @@ class _AddProductState extends State<AddProduct> {
                   child: Column(
                     children: [
                       _buildPhotoArea(),
+                      // Image.network(imageUrl),
                       Container(
                           alignment: Alignment.bottomRight,
                           child: IconButton(
@@ -116,6 +138,7 @@ class _AddProductState extends State<AddProduct> {
   }
 
   Widget _buildPhotoArea() {
+    // return Image.network(imageUrl);
     return _image != null
         ? Container(
             width: 300,

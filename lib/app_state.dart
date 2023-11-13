@@ -1,8 +1,11 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:shrine/firebase_options.dart';
 
@@ -39,6 +42,19 @@ class LikedProduct {
   String docid;
 }
 
+class ProductInWishlist {
+  ProductInWishlist({
+    required this.name,
+    required this.imageurl,
+    required this.productdocid,
+    required this.docid,
+  });
+  String name;
+  String imageurl;
+  String productdocid;
+  String docid;
+}
+
 class ApplicationState extends ChangeNotifier {
   StreamSubscription<QuerySnapshot>? _productListSubscription;
   List<ProductList> _products = [];
@@ -51,6 +67,9 @@ class ApplicationState extends ChangeNotifier {
     _isDesc = isDesc;
   }
 
+  List<ProductInWishlist> _wishlist = [];
+  List<ProductInWishlist> get wishlist => _wishlist;
+
   String _email = 'Anonymous';
   String get email => _email;
   String _imageurl = 'https://handong.edu/site/handong/res/img/logo.png';
@@ -60,13 +79,11 @@ class ApplicationState extends ChangeNotifier {
     init();
   }
 
-  Future<DocumentReference> addProduct(Product product) {
+  void addProduct(Product product) {
     int _products = 0;
     // int get products => _products;
 
-    return FirebaseFirestore.instance
-        .collection('products')
-        .add(<String, dynamic>{
+    FirebaseFirestore.instance.collection('products').add(<String, dynamic>{
       'name': product.name,
       'price': product.price,
       'description': product.description,
@@ -75,7 +92,19 @@ class ApplicationState extends ChangeNotifier {
       'timestamp': DateTime.now().millisecondsSinceEpoch,
       'editedtime': 0,
       'likes': 0,
+    }).then((DocumentReference) async {
+      final storageRef = FirebaseStorage.instance.ref();
+      final photoRef = storageRef.child("images/${product.imageurl}");
+      String filePath = product.imageurl;
+      File file = File(filePath);
+      await photoRef.putFile(file);
     });
+
+//     try {
+//   await photoRef.putFile(file);
+// } on firebase_core.FirebaseException catch (e) {
+//   // ...
+// }
   }
 
   Future<void> editProduct(Product productLocal, ProductList product) async {
@@ -115,10 +144,21 @@ class ApplicationState extends ChangeNotifier {
           .doc(product.docid)
           .delete()
           .then(
-            (doc) => print("Document deleted"),
-            onError: (e) => print("Error updating document $e"),
-          );
+        (doc) {
+          for (var wish in wishlist) {
+            if (wish.productdocid == product.docid) {
+              deleteFromWishlist(wish);
+            }
+          }
+          return print("Document deleted");
+        },
+        onError: (e) => print("Error updating document $e"),
+      );
     }
+  }
+
+  void deleteFromWishlist(ProductInWishlist wish) {
+    FirebaseFirestore.instance.collection('wishlist').doc(wish.docid).delete();
   }
 
   void changeOrder() {
@@ -148,6 +188,15 @@ class ApplicationState extends ChangeNotifier {
       }
       notifyListeners();
       // print(_products);
+    });
+  }
+
+  void addToWishlist(ProductList product) {
+    FirebaseFirestore.instance.collection('wishlist').add(<String, dynamic>{
+      'name': product.name,
+      'imageurl': product.imageurl,
+      'productdocid': product.docid,
+      'uid': FirebaseAuth.instance.currentUser!.uid,
     });
   }
 
@@ -202,17 +251,102 @@ class ApplicationState extends ChangeNotifier {
     });
 
     FirebaseAuth.instance.userChanges().listen((user) {
+      bool isSaved = false;
+
       if (user != null) {
         if (user.email != null) {
           _email = user.email!;
+        } else {
+          _email = 'Anonymous';
         }
 
         if (user.photoURL != null) {
           _imageurl = user.photoURL!;
+        } else {
+          _imageurl = 'https://handong.edu/site/handong/res/img/logo.png';
         }
 
         print('email: ${user.email}');
         print('image url: ${user.photoURL}');
+
+        FirebaseFirestore.instance
+            .collection('user')
+            .snapshots()
+            .listen((snapshot) {
+          for (final document in snapshot.docs) {
+            if (user.uid == document.data()['uid']) {
+              isSaved = true;
+            }
+          }
+          if (!isSaved) {
+            if (user.email != null) {
+              final docdata = {
+                'name': user.displayName,
+                'email': user.email,
+                'status_message':
+                    'I promise to take the test honestly before GOD.',
+                'uid': FirebaseAuth.instance.currentUser!.uid,
+              };
+              FirebaseFirestore.instance
+                  .collection('user')
+                  .doc(FirebaseAuth.instance.currentUser!.uid)
+                  .set(docdata)
+                  .onError((e, _) => print("Error writing document: $e"));
+              ;
+            } else {
+              final docdata = {
+                'status_message':
+                    'I promise to take the test honestly before GOD.',
+                'uid': FirebaseAuth.instance.currentUser!.uid,
+              };
+              FirebaseFirestore.instance
+                  .collection('user')
+                  .doc(FirebaseAuth.instance.currentUser!.uid)
+                  .set(docdata)
+                  .onError((e, _) => print("Error writing document: $e"));
+              ;
+            }
+          }
+        });
+
+        FirebaseFirestore.instance
+            .collection('wishlist')
+            .snapshots()
+            .listen((snapshot) {
+          _wishlist = [];
+          for (final document in snapshot.docs) {
+            if (FirebaseAuth.instance.currentUser!.uid ==
+                document.data()['uid']) {
+              _wishlist.add(
+                ProductInWishlist(
+                  name: document.data()['name'] as String,
+                  imageurl: document.data()['imageurl'] as String,
+                  productdocid: document.data()['productdocid'] as String,
+                  docid: document.id,
+                ),
+              );
+            }
+          }
+          notifyListeners();
+          // print(_products);
+        });
+
+        FirebaseFirestore.instance
+            .collection('likes')
+            .snapshots()
+            .listen((snapshot) {
+          _likedproducts = [];
+          for (final document in snapshot.docs) {
+            if (FirebaseAuth.instance.currentUser!.uid ==
+                document.data()['uid']) {
+              _likedproducts.add(LikedProduct(
+                docid: document.data()['docid'] as String,
+              ));
+            }
+          }
+          print(_likedproducts);
+          notifyListeners();
+        });
 
         // _productListSubscription = FirebaseFirestore.instance
         //     .collection('products')
